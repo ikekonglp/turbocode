@@ -1099,9 +1099,9 @@ void DependencyPipe::MakePartsGlobal(Instance *instance,
       dependency_parts->size() - num_parts_initial);
 
   num_parts_initial = dependency_parts->size();
- // if (dependency_options->use_grandparents()) {
- //   MakePartsGrandparents(instance, parts, gold_outputs);
- // }
+  if (dependency_options->use_grandparents()) {
+    MakePartsGrandparents(instance, parts, gold_outputs);
+  }
   dependency_parts->SetOffsetGrandpar(num_parts_initial,
       dependency_parts->size() - num_parts_initial);
 

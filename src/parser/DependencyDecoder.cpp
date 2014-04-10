@@ -1397,14 +1397,18 @@ void DependencyDecoder::DecodeFactorGraph(Instance *instance, Parts *parts,
       if (use_grandparent_head_automata &&
           ((use_grandparent_parts && use_next_sibling_parts) ||
            (use_grandsibling_parts))) {
-        for (int g = 0; g < sentence->size(); ++g) {
-          int r = dependency_parts->FindArc(g, h);
-          if (r < 0) continue;
-          int index = r - offset_arcs;
-          local_variables_grandparents.push_back(variables[index]);
-          DependencyPartArc *arc =
-            static_cast<DependencyPartArc*>((*parts)[offset_arcs + r]);
-          incoming_arcs.push_back(arc);
+        // LPK : only if the head word - h is not disabled, can we build the incoming
+        //       arcs for it.
+        if (!disabled_nodes[h]){
+          for (int g = 0; g < sentence->size(); ++g) {
+            int r = dependency_parts->FindArc(g, h);
+            if (r < 0) continue;
+            int index = r - offset_arcs;
+            local_variables_grandparents.push_back(variables[index]);
+            DependencyPartArc *arc =
+              static_cast<DependencyPartArc*>((*parts)[offset_arcs + r]);
+            incoming_arcs.push_back(arc);
+          }
         }
       }
 
@@ -1426,6 +1430,9 @@ void DependencyDecoder::DecodeFactorGraph(Instance *instance, Parts *parts,
           ((use_grandparent_parts && use_next_sibling_parts) ||
            (use_grandsibling_parts)) &&
           incoming_arcs.size() > 0) {
+        // LPK: Since there is a incoming_arcs > 0 constrains there
+        //      it seems we can simply prevent the automaton from construction
+        //      by banning all the incomimg arcs
         AD3::FactorGrandparentHeadAutomaton *factor =
           new AD3::FactorGrandparentHeadAutomaton;
         if (use_grandsibling_parts) {
@@ -1434,6 +1441,8 @@ void DependencyDecoder::DecodeFactorGraph(Instance *instance, Parts *parts,
                              left_siblings[h],
                              left_grandsiblings[h]);
         } else {
+          // LPK: This is the thing used in the standard model. (the left automata part.)
+          //      (the right part can be seen later in the code.)
           factor->Initialize(incoming_arcs, arcs,
                              left_grandparents[h],
                              left_siblings[h]);
