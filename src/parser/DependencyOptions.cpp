@@ -81,6 +81,19 @@ DEFINE_double(pruner_posterior_threshold, 0.0001,
 DEFINE_int32(pruner_max_heads, 10,
             "Maximum number of possible head words for a given word, in basic "
             "pruning.");
+DEFINE_bool(output_posterior, false,
+            "Output the posterior to the file when parse a file, this is used "
+            "for the first pass of the twitter parsing, which use a PTB model "
+            "to have the posteriors as features.");
+DEFINE_bool(use_posterior, false,
+            "True if we are using the PTB "
+            "model as the feature to train and to test. The posterior_dir "
+            "argument should tell the program where to find the posteriors for "
+            "the training/testing set.");
+DEFINE_string(posterior_dir, "",
+              "Path to the directory which is used to store or which contains the "
+              "posteriors from a PTB model. "
+              "Used for twitter parser.");
 
 // Options for pruner training.
 // TODO: implement these options.
@@ -188,6 +201,9 @@ void DependencyOptions::CopyPrunerFlags() {
   // General flags.
   FLAGS_model_type = "af"; // A pruner is always a arc-factored model.
   FLAGS_prune_basic = false; // A pruner has no inner basic pruner.
+
+  FLAGS_output_posterior = false; // A pruner does not need to output the posterior
+  FLAGS_posterior_dir = "";
 }
 
 void DependencyOptions::Initialize() {
@@ -204,6 +220,10 @@ void DependencyOptions::Initialize() {
   file_pruner_model_ = FLAGS_file_pruner_model;
   pruner_posterior_threshold_ = FLAGS_pruner_posterior_threshold;
   pruner_max_heads_ = FLAGS_pruner_max_heads;
+  
+  output_posterior_ = FLAGS_output_posterior;
+  use_posterior_ = FLAGS_use_posterior;
+  posterior_dir_ = FLAGS_posterior_dir;
 
   use_arbitrary_siblings_ = false;
   use_consecutive_siblings_ = false;

@@ -292,7 +292,7 @@ struct DependencyFeatureTemplateArc {
     HP_MB4,
     HB6_MP,
     HP_MB6,
-
+    TWITTER_PTB,      /* the PTB score feature for the model */
     COUNT
   };
 };

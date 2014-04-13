@@ -57,6 +57,10 @@ class DependencyOptions : public Options {
   bool use_nonprojective_arcs() { return use_nonprojective_arcs_; }
   bool use_directed_paths() { return use_directed_paths_; }
   bool use_head_bigrams() { return use_head_bigrams_; }
+  bool output_posterior() { return output_posterior_; }
+  bool use_posterior() { return use_posterior_; }
+  const string &GetPosteriorDir() { return posterior_dir_; }
+
 
  protected:
   string file_format_;
@@ -78,6 +82,10 @@ class DependencyOptions : public Options {
   bool use_nonprojective_arcs_;
   bool use_directed_paths_;
   bool use_head_bigrams_;
+
+  bool output_posterior_;
+  bool use_posterior_;
+  string posterior_dir_;
 };
 
 #endif // DEPENDENCY_OPTIONS_H_

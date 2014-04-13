@@ -118,6 +118,28 @@ void DependencyPipe::ComputeScores(Instance *instance, Parts *parts,
     }
     (*scores)[r] = parameters->ComputeScore(part_features);
   }
+
+    if (GetDependencyOptions()->output_posterior()) {
+
+    stringstream ss;
+    ss << index_current_instance_;
+    string index = ss.str();
+    string path = GetDependencyOptions()->GetPosteriorFilePath() + "/" + index;
+    ofstream os_;
+    os_.open(path.c_str(), ifstream::out);
+    CHECK(os_.good()) << "Could not open " << path << ".";
+    for (int r = 0; r < parts->size(); ++r) {
+      if ((*parts)[r]->type() == DEPENDENCYPART_ARC) {
+        int h = (static_cast<DependencyPartArc*>((*parts)[r]))->head();
+        int m =
+            (static_cast<DependencyPartArc*>((*parts)[r]))->modifier();
+        os_ << h << "\t" << m << "\t" << (*scores)[r] << endl;
+      }
+    }
+    os_.flush();
+    os_.clear();
+    os_.close();
+  }
 }
 
 void DependencyPipe::RemoveUnsupportedFeatures(Instance *instance, Parts *parts,
@@ -1180,6 +1202,16 @@ bool DependencyPipe::IsProjectiveArc(const vector<int> &heads,
   return true;
 }
 
+double DependencyPipe::FindingValue(int h, int m, vector<int>& h_vector, vector<int>& m_vector,
+    vector<double>& value_vector) {
+  for(int i = 0; i < h_vector.size(); i++){
+    if(h==h_vector[i] && m==m_vector[i]){
+      return value_vector[i];
+    }
+  }
+  return -1;
+}
+
 void DependencyPipe::MakeSelectedFeatures(Instance *instance,
                                           Parts *parts,
                                           bool pruner,
@@ -1193,6 +1225,70 @@ void DependencyPipe::MakeSelectedFeatures(Instance *instance,
   int sentence_length = sentence->size();
 
   dependency_features->Initialize(instance, parts);
+  DependencyOptions *options = static_cast<DependencyOptions*>(options_);
+  vector<int> h_vector;
+  vector<int> m_vector;
+  vector<double> value_vector;
+
+  vector<double> punct_position;
+
+  if (options->use_posterior()) {
+    // Read key_vector and value_vector from the file
+    int index = index_current_instance_;
+    stringstream ss;
+    ss << index_current_instance_;
+    string indexs = ss.str();
+    string path = options->GetPosteriorFilePath() + "/" + indexs;
+    ifstream in(path.c_str());
+    string s;
+
+    while(getline(in,s))
+    {
+      char* str = new char[s.size() + 1];
+      str[s.size()] = 0;
+      memcpy(str, s.c_str(), s.size());
+
+      int h;
+      int m;
+      double v = 0.0;
+      sscanf(str, "%d\t%d\t%lf", &h, &m, &v);
+
+      h_vector.push_back(h);
+      m_vector.push_back(m);
+      value_vector.push_back(v);
+
+      //LOG(INFO)<< h << "\t" << m << "\t" << v << endl;
+    }
+    /*
+      double max = -1;
+    for(int i = 0; i < value_vector.size(); i++){
+      double t = fabs(value_vector[i]);
+      if(t > max){
+        max = t;
+      }
+    }
+    for (int i = 0; i < value_vector.size(); i++) {
+      // scale down to 0 to 2
+      value_vector[i] = (value_vector[i] / max) + 1;
+    }
+    */
+
+    string punct_file_path = options -> GetPunctFilePath() + "/" + indexs;
+
+    ifstream punctin(punct_file_path.c_str());
+    while(getline(punctin,s)){
+      char* str = new char[s.size() + 1];
+      str[s.size()] = 0;
+      memcpy(str, s.c_str(), s.size());
+      double position = 0.0;
+      sscanf(str, "%lf", &position);
+      punct_position.push_back(position);
+      //LOG(INFO) << str <<" str" << endl;
+      //LOG(INFO) << position << " pos" << endl;
+    }
+
+
+  }
 
   // Even in the case of labeled parsing, build features for unlabeled arcs
   // only. They will later be conjoined with the labels.
@@ -1209,6 +1305,53 @@ void DependencyPipe::MakeSelectedFeatures(Instance *instance,
     } else {
       dependency_features->AddArcFeatures(sentence, r, arc->head(),
                                           arc->modifier());
+    }
+    if (options->use_posterior()) {
+      double value = FindingValue(arc->head(), arc->modifier(), h_vector,
+          m_vector, value_vector);
+         //dependency_features->AddBasePTBFeatures()
+      //LOG(INFO)<< arc->head()<<"\t"<< arc->modifier()<< "\t" << value << endl;
+
+      for (uint16_t i = 0; i < 200; i++) {
+        //uint8_t fired = value * 100 > i ? 1 : 0;
+        uint8_t fired = (value * 10) + 100 > i ? 1 : 0;
+        if(fired == 0){
+          break;
+        }
+        dependency_features->AddBasePTBFeatures(r, fired, i);
+      }
+      if(value < 0){
+        dependency_features->AddBasePTBFeatures(r, 1, 201);
+      }else{
+        dependency_features->AddBasePTBFeatures(r, 0, 201);
+      }
+        //LOG(INFO)<<(int)fired<<" ";
+
+      //LOG(INFO)<<endl;
+      bool cross_punct = false;
+      uint8_t dir = (arc->head() - arc->modifier()) > 0 ? 1: 0;
+      uint16_t fea = 0; // "0" means the arc do not cross any punct
+      int hk = 0;
+      int mk = 0;
+      for(int k = 0; k < punct_position.size(); k++){
+        if(punct_position[k] > arc->head()){
+          hk = k;
+        }
+      }
+      for(int k = 0; k < punct_position.size(); k++){
+        if(punct_position[k] > arc->modifier()){
+          mk = k;
+        }
+      }
+      if(mk!=hk){
+        // cross a punct some where
+        fea = fabs(hk-mk);
+      }
+      // First, it did cross
+       //dependency_features->AddPunctCrossFeatures(r, dir, fea == 0 ? 0 : 1);
+      //LOG(INFO) << 
+      // Second, cross by how much
+       //dependency_features->AddPuncFeatures(r, dir, fea);
     }
   }
 

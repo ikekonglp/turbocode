@@ -151,6 +151,10 @@ class DependencyPipe : public Pipe {
     MakeSelectedFeatures(instance, parts, train_pruner_, selected_parts,
                          features);
   }
+    
+  double FindingValue(int h, int m, vector<int>& h_vector, vector<int>& m_vector,
+      vector<double>& value_vector);
+  
   void MakeSelectedFeatures(Instance *instance,
                             Parts *parts,
                             bool pruner,

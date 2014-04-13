@@ -247,6 +247,7 @@ class Pipe {
   // evaluation purposes).
   int num_mistakes_;  
   int num_total_parts_;
+  int index_current_instance_;
 };
 
 #endif /* PIPE_H_ */

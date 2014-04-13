@@ -230,6 +230,7 @@ void Pipe::TrainEpoch(int epoch) {
   LOG(INFO) << " Iteration #" << epoch + 1;
 
   dictionary_->StopGrowth();
+  index_current_instance_ = 0;
 
   for (int i = 0; i < instances_.size(); i++) {
     VLOG(2) << "Instance " << i;
@@ -352,6 +353,7 @@ void Pipe::TrainEpoch(int epoch) {
     } else {
       CHECK(false) << "Unknown algorithm: " << options_->GetTrainingAlgorithm();
     }
+    ++index_current_instance_;
   }
 
   // Compute the regularization value (halved squared L2 norm of the weights).
@@ -394,6 +396,7 @@ void Pipe::Run() {
 
   int num_instances = 0;
   Instance *instance = reader_->GetNext();
+  index_current_instance_ = 0;
   while (instance) {
     Instance *formatted_instance = GetFormattedInstance(instance);
 
@@ -415,6 +418,7 @@ void Pipe::Run() {
 
     instance = reader_->GetNext();
     ++num_instances;
+    ++index_current_instance_;
   }
 
   delete parts;
