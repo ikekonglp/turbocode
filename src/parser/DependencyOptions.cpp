@@ -82,29 +82,6 @@ DEFINE_int32(pruner_max_heads, 10,
             "Maximum number of possible head words for a given word, in basic "
             "pruning.");
 
-// LPK: To do, here we only use an engineering trick to to this things, which is
-//      just set the related field to default/null values. This may affect the
-//      speed to some degree.
-DEFINE_bool(use_brown_cluster_features, true,
-             "True if we are going to use the Brown Cluster 4, 6, all bits as "
-             "features in the model.");
-DEFINE_bool(pre_select_tokens, true,
-             "True if we have the predefined results for which tokens we are going "
-             "to parse and which we want to exclude from the tree.");
-DEFINE_bool(output_posterior, false,
-            "Output the posterior to the file when parse a file, this is used "
-            "for the first pass of the twitter parsing, which use a PTB model "
-            "to have the posteriors as features.");
-DEFINE_bool(use_posterior, false,
-            "True if we are using the use the PTB "
-            "model as the feature to train and to test. The posterior_file "
-            "argument should tell the program where to find the posteriors for "
-            "the training/testing set.");
-DEFINE_string(posterior_dir, "",
-              "Path to the directory which is used to store or which contains the "
-              "posteriors from a PTB model. "
-              "Used for twitter parser.");
-
 // Options for pruner training.
 // TODO: implement these options.
 DEFINE_string(pruner_train_algorithm, "crf_mira",
@@ -129,7 +106,6 @@ DEFINE_string(pruner_train_learning_rate_schedule, "invsqrt",
               "Options are fixed, lecun, invsqrt, inv.");
 DEFINE_bool(pruner_large_feature_set, false,
             "True for using a large feature set in the pruner.");
-
 
 // TODO: Implement the tagger within the parser.
 // DEFINE_bool(train_tagger, true,
@@ -156,12 +132,6 @@ void DependencyOptions::Save(FILE* fs) {
   success = WriteDouble(fs, pruner_posterior_threshold_);
   CHECK(success);
   success = WriteInteger(fs, pruner_max_heads_);
-  CHECK(success);
-  success = WriteBool(fs, use_brown_cluster_features_);
-  CHECK(success);
-  success = WriteBool(fs, pre_select_tokens_);
-  CHECK(success);
-  success = WriteBool(fs, use_posterior_);
   CHECK(success);
 }
 
@@ -196,17 +166,6 @@ void DependencyOptions::Load(FILE* fs) {
   success = ReadInteger(fs, &FLAGS_pruner_max_heads);
   CHECK(success);
   LOG(INFO) << "Setting --pruner_max_heads=" << FLAGS_pruner_max_heads;
-  success = ReadBool(fs, &FLAGS_use_brown_cluster_features);
-  CHECK(success);
-  LOG(INFO) << "Setting --use_brown_cluster_features=" << FLAGS_use_brown_cluster_features;
-  success = ReadBool(fs, &FLAGS_pre_select_tokens);
-  CHECK(success);
-  LOG(INFO) << "Setting -- pre_select_tokens=" << FLAGS_pre_select_tokens;
-  success = ReadBool(fs, &FLAGS_use_posterior);
-  CHECK(success);
-  LOG(INFO) << "Setting -- use_posterior=" << FLAGS_use_posterior;
-
-
 
   Initialize();
 }
@@ -229,9 +188,6 @@ void DependencyOptions::CopyPrunerFlags() {
   // General flags.
   FLAGS_model_type = "af"; // A pruner is always a arc-factored model.
   FLAGS_prune_basic = false; // A pruner has no inner basic pruner.
-
-  FLAGS_output_posterior = false; // A pruner does not need to output the posterior
-  FLAGS_posterior_dir = "";
 }
 
 void DependencyOptions::Initialize() {
@@ -248,12 +204,6 @@ void DependencyOptions::Initialize() {
   file_pruner_model_ = FLAGS_file_pruner_model;
   pruner_posterior_threshold_ = FLAGS_pruner_posterior_threshold;
   pruner_max_heads_ = FLAGS_pruner_max_heads;
-
-  output_posterior_ = FLAGS_output_posterior;
-  posterior_dir_ = FLAGS_posterior_dir;
-  use_posterior_ = FLAGS_use_posterior;
-  use_brown_cluster_features_ = FLAGS_use_brown_cluster_features;
-  pre_select_tokens_ = FLAGS_pre_select_tokens;
 
   use_arbitrary_siblings_ = false;
   use_consecutive_siblings_ = false;

@@ -58,12 +58,6 @@ class DependencyOptions : public Options {
   bool use_directed_paths() { return use_directed_paths_; }
   bool use_head_bigrams() { return use_head_bigrams_; }
 
-  bool output_posterior() { return output_posterior_; }
-  const string &GetProteriorDir() { return posterior_dir_; }
-  bool use_posterior() { return use_posterior_; }
-  bool use_brown_cluster_features() { return use_brown_cluster_features_; }
-  bool pre_select_tokens() { return pre_select_tokens_; }
-
  protected:
   string file_format_;
   string model_type_;
@@ -84,13 +78,6 @@ class DependencyOptions : public Options {
   bool use_nonprojective_arcs_;
   bool use_directed_paths_;
   bool use_head_bigrams_;
-
-  bool output_posterior_;
-  string posterior_dir_;
-  bool use_posterior_;
-  bool use_brown_cluster_features_;
-  bool pre_select_tokens_;
-
 };
 
 #endif // DEPENDENCY_OPTIONS_H_

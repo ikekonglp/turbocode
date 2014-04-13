@@ -73,23 +73,13 @@ DependencyInstance *DependencyReader::GetNext() {
     // LPK_TODO: If we would like to add an line to the original Conll format -- augmented Conll Format,
     // we would want to read something from here with index longer than 9
     // Also, at the same time, the format of the DependencyInstance should be changed
-    DependencyOptions *doptions = pipe_-> GetDependencyOptions();
 
     forms[i+1] = info[1];
+    brownall[i+1] = info[12];
     lemmas[i+1] = info[2];
     cpos[i+1] = info[3];
-
-    if (doptions->use_brown_cluster_features()){
-      brown4[i+1] = info[10];
-      brown6[i+1] = info[11];
-      brownall[i+1] = info[12];
-      select_field_index = 13;
-    }else{
-      brown4[i+1] = "OOV";
-      brown6[i+1] = "OOV";
-      brownall[i+1] = "OOV";
-    }
-
+    brown4[i+1] = info[10];
+    brown6[i+1] = info[11];
     pos[i+1] = info[4];
 
     string feat_seq = info[5];
@@ -107,13 +97,10 @@ DependencyInstance *DependencyReader::GetNext() {
     stringstream ss(info[6]);
     ss >> heads[i+1];
 
-    if (doptions -> pre_select_tokens()){
-      stringstream sss(info[13]);
-      //VLOG(2) << "input into select " << info[13];
-      sss >> selects[i+1];
-    }else{
-      selects[i+1] = 1;
-    }
+    stringstream sss(info[13]);
+    //VLOG(2) << "input into select " << info[13];
+    sss >> selects[i+1];
+
   }
 
   DependencyInstance *instance = NULL;

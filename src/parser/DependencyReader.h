@@ -28,14 +28,10 @@ using namespace std;
 class DependencyReader : public Reader {
 public:
   DependencyReader() {};
-  DependencyReader(DependencyPipe *pipe) : pipe_(pipe) {};
   virtual ~DependencyReader() {};
 
 public:
   DependencyInstance *GetNext();
-
-protected:
-  DependencyPipe *pipe_;
 };
 
 #endif /* DEPENDENCYREADER_H_ */
