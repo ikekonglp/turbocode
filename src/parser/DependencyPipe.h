@@ -72,7 +72,7 @@ class DependencyPipe : public Pipe {
     dictionary_ = new DependencyDictionary(this);
     GetDependencyDictionary()->SetTokenDictionary(token_dictionary_);
   };
-  void CreateReader() { reader_ = new DependencyReader; };
+  void CreateReader() { reader_ = new DependencyReader(this); };
   void CreateWriter() { writer_ = new DependencyWriter; };
   void CreateDecoder() { decoder_ = new DependencyDecoder(this); };
   Parts *CreateParts() { return new DependencyParts; };
