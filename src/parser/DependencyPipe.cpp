@@ -124,7 +124,7 @@ void DependencyPipe::ComputeScores(Instance *instance, Parts *parts,
     stringstream ss;
     ss << index_current_instance_;
     string index = ss.str();
-    string path = GetDependencyOptions()->GetPosteriorFilePath() + "/" + index;
+    string path = GetDependencyOptions()->GetPosteriorDir() + "/" + index;
     ofstream os_;
     os_.open(path.c_str(), ifstream::out);
     CHECK(os_.good()) << "Could not open " << path << ".";
@@ -1230,7 +1230,6 @@ void DependencyPipe::MakeSelectedFeatures(Instance *instance,
   vector<int> m_vector;
   vector<double> value_vector;
 
-  vector<double> punct_position;
 
   if (options->use_posterior()) {
     // Read key_vector and value_vector from the file
@@ -1238,7 +1237,7 @@ void DependencyPipe::MakeSelectedFeatures(Instance *instance,
     stringstream ss;
     ss << index_current_instance_;
     string indexs = ss.str();
-    string path = options->GetPosteriorFilePath() + "/" + indexs;
+    string path = options->GetPosteriorDir() + "/" + indexs;
     ifstream in(path.c_str());
     string s;
 
@@ -1273,21 +1272,6 @@ void DependencyPipe::MakeSelectedFeatures(Instance *instance,
     }
     */
 
-    string punct_file_path = options -> GetPunctFilePath() + "/" + indexs;
-
-    ifstream punctin(punct_file_path.c_str());
-    while(getline(punctin,s)){
-      char* str = new char[s.size() + 1];
-      str[s.size()] = 0;
-      memcpy(str, s.c_str(), s.size());
-      double position = 0.0;
-      sscanf(str, "%lf", &position);
-      punct_position.push_back(position);
-      //LOG(INFO) << str <<" str" << endl;
-      //LOG(INFO) << position << " pos" << endl;
-    }
-
-
   }
 
   // Even in the case of labeled parsing, build features for unlabeled arcs
@@ -1309,8 +1293,6 @@ void DependencyPipe::MakeSelectedFeatures(Instance *instance,
     if (options->use_posterior()) {
       double value = FindingValue(arc->head(), arc->modifier(), h_vector,
           m_vector, value_vector);
-         //dependency_features->AddBasePTBFeatures()
-      //LOG(INFO)<< arc->head()<<"\t"<< arc->modifier()<< "\t" << value << endl;
 
       for (uint16_t i = 0; i < 200; i++) {
         //uint8_t fired = value * 100 > i ? 1 : 0;
@@ -1325,33 +1307,6 @@ void DependencyPipe::MakeSelectedFeatures(Instance *instance,
       }else{
         dependency_features->AddBasePTBFeatures(r, 0, 201);
       }
-        //LOG(INFO)<<(int)fired<<" ";
-
-      //LOG(INFO)<<endl;
-      bool cross_punct = false;
-      uint8_t dir = (arc->head() - arc->modifier()) > 0 ? 1: 0;
-      uint16_t fea = 0; // "0" means the arc do not cross any punct
-      int hk = 0;
-      int mk = 0;
-      for(int k = 0; k < punct_position.size(); k++){
-        if(punct_position[k] > arc->head()){
-          hk = k;
-        }
-      }
-      for(int k = 0; k < punct_position.size(); k++){
-        if(punct_position[k] > arc->modifier()){
-          mk = k;
-        }
-      }
-      if(mk!=hk){
-        // cross a punct some where
-        fea = fabs(hk-mk);
-      }
-      // First, it did cross
-       //dependency_features->AddPunctCrossFeatures(r, dir, fea == 0 ? 0 : 1);
-      //LOG(INFO) << 
-      // Second, cross by how much
-       //dependency_features->AddPuncFeatures(r, dir, fea);
     }
   }
 

@@ -84,10 +84,8 @@ class DependencyFeatures: public Features {
                            int r,
                            int head,
                            int modifier);
-  
+
   void AddBasePTBFeatures(int r, uint8_t fired, uint16_t bit_position);
-  void AddPuncFeatures(int r, uint8_t dir, uint16_t cross);
-  void AddPunctCrossFeatures(int r, uint8_t dir, uint16_t cross);
 
   void AddArcFeatures(DependencyInstanceNumeric *sentence,
                       int r,

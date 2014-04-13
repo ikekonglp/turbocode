@@ -96,16 +96,6 @@ void DependencyFeatures::AddBasePTBFeatures(int r, uint8_t fired, uint16_t bit_p
   AddFeature(fkey, input_features_[r]);
 }
 
-void DependencyFeatures::AddPuncFeatures(int r, uint8_t dir, uint16_t cross){
-  uint64_t fkey = encoder_.CreateFKey_W(DependencyFeatureTemplateArc::TWITTER_PUNCT, dir, cross);
-  AddFeature(fkey, input_features_[r]);
-}
-
-void DependencyFeatures::AddPunctCrossFeatures(int r, uint8_t dir, uint16_t cross){
-  uint64_t fkey = encoder_.CreateFKey_W(DependencyFeatureTemplateArc::TWITTER_PUNCT_CROSS, dir, cross);
-  AddFeature(fkey, input_features_[r]);
-}
-
 // Add features for arbitrary siblings.
 void DependencyFeatures::AddArbitrarySiblingFeatures(
                           DependencyInstanceNumeric* sentence,
