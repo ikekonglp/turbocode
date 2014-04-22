@@ -155,7 +155,8 @@ void DependencyInstanceNumeric::Initialize(
                strcmp(tag, "conj") == 0 ||
                strcmp(tag, "Conjunction") == 0 ||
                strcmp(tag, "CC") == 0 ||
-               strcmp(tag, "cc") == 0) {
+               strcmp(tag, "cc") == 0 ||
+               strcmp(tag, "&") == 0) {
       is_coord_[i] = true;
     }
 
