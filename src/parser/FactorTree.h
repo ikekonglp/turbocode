@@ -95,6 +95,9 @@ class FactorTree : public GenericFactor {
         //if(variable_log_potentials[index] > 50){
         //  VLOG(2) << "Warning: very large log_potential : \t" << h << " " << m << " " << variable_log_potentials[index];
         //}
+        if(index < 0){
+          continue;
+        }
         *value += variable_log_potentials[index];
 //      }
     }
@@ -117,6 +120,9 @@ class FactorTree : public GenericFactor {
       }
 
       int index = index_arcs_[h][m];
+      if(index < 0){
+        continue;
+      }
       (*variable_posteriors)[index] += weight;
     }
   }
