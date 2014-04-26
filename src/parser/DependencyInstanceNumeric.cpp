@@ -45,6 +45,9 @@ void DependencyInstanceNumeric::Initialize(
 
   // LPK: Note here, only the feats_ids is vector<vector<int>> while others are only vector<int>
   feats_ids_.resize(length);
+  precompute_between_verbs_.resize(length);
+  precompute_between_puncts_.resize(length);
+  precompute_between_coords_.resize(length);
 
   pos_ids_.resize(length);
   cpos_ids_.resize(length);
@@ -122,13 +125,19 @@ void DependencyInstanceNumeric::Initialize(
       feats_ids_[i][j] = id;
     }
 
+    // Allocate the space for the precomputing vectors
+    // The value of these will be filled later
+    precompute_between_verbs_[i].resize(length);
+    precompute_between_puncts_[i].resize(length);
+    precompute_between_coords_[i].resize(length);
+
     GetWordShape(instance->GetForm(i), &shapes_[i]);
 
     // Check whether the word is a noun, verb, punctuation or coordination.
     // Note: this depends on the POS tag string.
     // This procedure is taken from EGSTRA
     // (http://groups.csail.mit.edu/nlp/egstra/).
-    // LPK_TODO: These need to be change when we adapt TurboParser to parse tweets
+    
     is_noun_[i] = false;
     is_verb_[i] = false;
     is_punc_[i] = false;
@@ -164,5 +173,46 @@ void DependencyInstanceNumeric::Initialize(
     selects_[i] = instance->GetSelect(i);
     relations_[i] = dictionary.GetLabelAlphabet().Lookup(
         instance->GetDependencyRelation(i));
+  }
+
+  for (int left_position = 0; left_position < length; left_position++) {
+    for (int right_position = 0; right_position < length; right_position++) {
+      // Precompute the tables for between verbs, puncts and coords
+      // Several flags.
+      // 4 bits to denote the kind of flag.
+      // Maximum will be 16 flags.
+      uint8_t flag_between_verb = 0x0;
+      uint8_t flag_between_punc = 0x1;
+      uint8_t flag_between_coord = 0x2;
+
+      int num_between_verb = 0;
+      int num_between_punc = 0;
+      int num_between_coord = 0;
+      for (int i = left_position + 1; i < right_position; ++i) {
+        if (IsVerb(i)) {
+          ++num_between_verb;
+        } else if (IsPunctuation(i)) {
+          ++num_between_punc;
+        } else if (IsCoordination(i)) {
+          ++num_between_coord;
+        }
+      }
+
+      // 4 bits to denote the number of occurrences for each flag.
+      // Maximum will be 15 occurrences.
+      int max_occurrences = 15;
+      if (num_between_verb > max_occurrences) num_between_verb = max_occurrences;
+      if (num_between_punc > max_occurrences) num_between_punc = max_occurrences;
+      if (num_between_coord > max_occurrences) num_between_coord = max_occurrences;
+      flag_between_verb |= (num_between_verb << 4);
+      flag_between_punc |= (num_between_punc << 4);
+      flag_between_coord |= (num_between_coord << 4);
+
+      // Write the results to the 2-dimension vectors for future use
+      precompute_between_verbs_[left_position][right_position] = flag_between_verb;
+      precompute_between_puncts_[left_position][right_position] = flag_between_punc;
+      precompute_between_coords_[left_position][right_position] = flag_between_coord;
+
+    }
   }
 }

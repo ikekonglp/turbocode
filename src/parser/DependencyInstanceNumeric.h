@@ -127,16 +127,14 @@ public:
     }
     return heads_[i]; 
   };
-  int GetSelect(int i){
-    return selects_[i]; 
-  }
+  int GetSelect(int i){ return selects_[i]; }
   int GetRelationId(int i) { return relations_[i]; };
- 
- private:
-  // LPK: These seems to be the real features used in the system, if we want to add a feature, we must
-  // get to this point, where we make every thing numeric.
-  // LPK_TODO: Let's make it in the to-do list.
+  int GetPrecomputeBetweenVerbs(int i, int j) { return precompute_between_verbs_[i][j]; };
+  int GetPrecomputeBetweenPuncts(int i, int j) { return precompute_between_puncts_[i][j]; };
+  int GetPrecomputeBetweenCoords(int i, int j) { return precompute_between_coords_[i][j]; };
 
+
+ private:
   vector<int> form_ids_;
   vector<int> brownall_ids_;
   vector<int> lemma_ids_;
@@ -155,6 +153,11 @@ public:
   vector<int> heads_;
   vector<int> relations_;
   vector<int> selects_;
+
+  vector<vector<int> > precompute_between_verbs_;
+  vector<vector<int> > precompute_between_puncts_;
+  vector<vector<int> > precompute_between_coords_;
+
 };
 
 #endif /* DEPENDENCYINSTANCENUMERIC_H_ */

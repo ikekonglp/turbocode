@@ -16,11 +16,15 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with TurboParser 2.1.  If not, see <http://www.gnu.org/licenses/>.
 
+#include "Utils.h"
+#include <iostream>
+#include <sstream>
 #include "DependencyPipe.h"
 #include "DependencyFeatures.h"
 #include "DependencyPart.h"
 #include "DependencyFeatureTemplates.h"
 #include <set>
+
 
 // Flags for specific options in feature definitions.
 // Note: this will be deprecated soon.
@@ -1239,37 +1243,10 @@ void DependencyFeatures::AddWordPairFeatures(DependencyInstanceNumeric* sentence
 
   uint8_t ppHQID, ppMQID, nnHQID, nnMQID;
 
-  // Several flags.
-  // 4 bits to denote the kind of flag.
-  // Maximum will be 16 flags.
-  uint8_t flag_between_verb = 0x0;
-  uint8_t flag_between_punc = 0x1;
-  uint8_t flag_between_coord = 0x2;
-
-  // TODO: This is expensive and could be precomputed.
-  int num_between_verb = 0;
-  int num_between_punc = 0;
-  int num_between_coord = 0;
-  for (int i = left_position + 1; i < right_position; ++i) {
-    if (sentence->IsVerb(i)) {
-      ++num_between_verb;
-    } else if (sentence->IsPunctuation(i)) {
-      ++num_between_punc;
-    } else if (sentence->IsCoordination(i)) {
-      ++num_between_coord;
-    }
-  }
-
-  // 4 bits to denote the number of occurrences for each flag.
-  // Maximum will be 15 occurrences.
-  int max_occurrences = 15;
-  if (num_between_verb > max_occurrences) num_between_verb = max_occurrences;
-  if (num_between_punc > max_occurrences) num_between_punc = max_occurrences;
-  if (num_between_coord > max_occurrences) num_between_coord = max_occurrences;
-  flag_between_verb |= (num_between_verb << 4);
-  flag_between_punc |= (num_between_punc << 4);
-  flag_between_coord |= (num_between_coord << 4);
-
+  uint8_t flag_between_verb = sentence->GetPrecomputeBetweenVerbs(left_position, right_position);
+  uint8_t flag_between_punc = sentence->GetPrecomputeBetweenPuncts(left_position, right_position);
+  uint8_t flag_between_coord = sentence->GetPrecomputeBetweenCoords(left_position, right_position);
+  
   // Maximum is 255 feature templates.
   //LOG(INFO) << DependencyFeatureTemplateArc::COUNT;
   CHECK_LT(DependencyFeatureTemplateArc::COUNT, 256);
