@@ -395,6 +395,42 @@ struct DependencyFeatureTemplateSibling {
     HB6_MP,
     HP_MB6,
 
+    /* In between features */
+
+    HMBFLAG,                  /* X-between flag between the head and the mod */
+    HSBFLAG,                  /* X-between flag between the head and the sib */
+    MSBFLAG,                  /* X-between flag between the mod and the sib */
+
+    /* Joint with the POS and Word form */
+    HP_MP_HMBFLAG,
+    HP_SP_HMBFLAG,
+    MP_SP_HMBFLAG,
+
+    HP_MP_HSBFLAG,
+    HP_SP_HSBFLAG,
+    MP_SP_HSBFLAG,
+
+    HP_MP_MSBFLAG,
+    HP_SP_MSBFLAG,
+    MP_SP_MSBFLAG,
+
+    HW_MW_HMBFLAG,
+    HW_SW_HMBFLAG,
+    MW_SW_HMBFLAG,
+
+    HW_MW_HSBFLAG,
+    HW_SW_HSBFLAG,
+    MW_SW_HSBFLAG,
+
+    HW_MW_MSBFLAG,
+    HW_SW_MSBFLAG,
+    MW_SW_MSBFLAG,
+
+    HP_MP_SP_HMBFLAG,
+    HP_MP_SP_HSBFLAG,
+    HP_MP_SP_MSBFLAG,
+
+
     COUNT
   };
 };
@@ -489,6 +525,41 @@ struct DependencyFeatureTemplateGrandparent {
     HP_MB4,
     HB6_MP,
     HP_MB6,
+
+    /* In between features */
+    GHBFLAG,                 
+    GMBFLAG,                  
+    HMBFLAG, 
+
+    /* Joint with the POS and Word form */
+    GP_HP_GHBFLAG,
+    GP_MP_GHBFLAG,
+    HP_MP_GHBFLAG,
+
+    GW_HW_GHBFLAG,
+    GW_MW_GHBFLAG,
+    HW_MW_GHBFLAG,
+
+    GP_HP_GMBFLAG,
+    GP_MP_GMBFLAG,
+    HP_MP_GMBFLAG,
+
+    GW_HW_GMBFLAG,
+    GW_MW_GMBFLAG,
+    HW_MW_GMBFLAG,
+
+    GP_HP_HMBFLAG,
+    GP_MP_HMBFLAG,
+    HP_MP_HMBFLAG,
+
+    GW_HW_HMBFLAG,
+    GW_MW_HMBFLAG,
+    HW_MW_HMBFLAG,
+
+
+    GP_HP_MP_GHBFLAG,
+    GP_HP_MP_GMBFLAG,
+    GP_HP_MP_HMBFLAG,
 
     COUNT
   };

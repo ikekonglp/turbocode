@@ -45,9 +45,16 @@ void DependencyInstanceNumeric::Initialize(
 
   // LPK: Note here, only the feats_ids is vector<vector<int>> while others are only vector<int>
   feats_ids_.resize(length);
-  precompute_between_verbs_.resize(length);
-  precompute_between_puncts_.resize(length);
-  precompute_between_coords_.resize(length);
+  precompute_between_verbs_.resize(length+1);
+  precompute_between_puncts_.resize(length+1);
+  precompute_between_coords_.resize(length+1);
+  for (i = 0; i < length+1; i++) {
+    // Allocate the space for the precomputing vectors
+    // The value of these will be filled later
+    precompute_between_verbs_[i].resize(length+1);
+    precompute_between_puncts_[i].resize(length+1);
+    precompute_between_coords_[i].resize(length+1);
+  }
 
   pos_ids_.resize(length);
   cpos_ids_.resize(length);
@@ -125,11 +132,6 @@ void DependencyInstanceNumeric::Initialize(
       feats_ids_[i][j] = id;
     }
 
-    // Allocate the space for the precomputing vectors
-    // The value of these will be filled later
-    precompute_between_verbs_[i].resize(length);
-    precompute_between_puncts_[i].resize(length);
-    precompute_between_coords_[i].resize(length);
 
     GetWordShape(instance->GetForm(i), &shapes_[i]);
 
@@ -176,7 +178,7 @@ void DependencyInstanceNumeric::Initialize(
   }
 
   for (int left_position = 0; left_position < length; left_position++) {
-    for (int right_position = 0; right_position < length; right_position++) {
+    for (int right_position = left_position + 1; right_position < length; right_position++) {
       // Precompute the tables for between verbs, puncts and coords
       // Several flags.
       // 4 bits to denote the kind of flag.
@@ -199,8 +201,9 @@ void DependencyInstanceNumeric::Initialize(
       }
 
       // 4 bits to denote the number of occurrences for each flag.
-      // Maximum will be 15 occurrences.
-      int max_occurrences = 15;
+      // Maximum will be 14 occurrences.
+      // 15 will be used for extra uses.
+      int max_occurrences = 14;
       if (num_between_verb > max_occurrences) num_between_verb = max_occurrences;
       if (num_between_punc > max_occurrences) num_between_punc = max_occurrences;
       if (num_between_coord > max_occurrences) num_between_coord = max_occurrences;
@@ -209,10 +212,25 @@ void DependencyInstanceNumeric::Initialize(
       flag_between_coord |= (num_between_coord << 4);
 
       // Write the results to the 2-dimension vectors for future use
-      precompute_between_verbs_[left_position][right_position] = flag_between_verb;
-      precompute_between_puncts_[left_position][right_position] = flag_between_punc;
-      precompute_between_coords_[left_position][right_position] = flag_between_coord;
+      precompute_between_verbs_[left_position+1][right_position+1] = flag_between_verb;
+      precompute_between_puncts_[left_position+1][right_position+1] = flag_between_punc;
+      precompute_between_coords_[left_position+1][right_position+1] = flag_between_coord;
 
     }
+  }
+  for (int position = 0; position < length+1; position++) {
+      // This is the special signal for the -1s.
+      uint8_t flag_between_verb = 0x0;
+      uint8_t flag_between_punc = 0x1;
+      uint8_t flag_between_coord = 0x2;
+
+      int max_occurrences = 15;
+      flag_between_verb |= (max_occurrences << 4);
+      flag_between_punc |= (max_occurrences << 4);
+      flag_between_coord |= (max_occurrences << 4);
+
+      precompute_between_verbs_[0][position] = flag_between_verb;
+      precompute_between_puncts_[0][position] = flag_between_punc;
+      precompute_between_coords_[0][position] = flag_between_coord;
   }
 }

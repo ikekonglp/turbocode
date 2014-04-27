@@ -129,9 +129,9 @@ public:
   };
   int GetSelect(int i){ return selects_[i]; }
   int GetRelationId(int i) { return relations_[i]; };
-  int GetPrecomputeBetweenVerbs(int i, int j) { return precompute_between_verbs_[i][j]; };
-  int GetPrecomputeBetweenPuncts(int i, int j) { return precompute_between_puncts_[i][j]; };
-  int GetPrecomputeBetweenCoords(int i, int j) { return precompute_between_coords_[i][j]; };
+  int GetPrecomputeBetweenVerbs(int i, int j) { return precompute_between_verbs_[i+1][j+1]; };
+  int GetPrecomputeBetweenPuncts(int i, int j) { return precompute_between_puncts_[i+1][j+1]; };
+  int GetPrecomputeBetweenCoords(int i, int j) { return precompute_between_coords_[i+1][j+1]; };
 
 
  private:

@@ -175,6 +175,34 @@ void DependencyFeatures::AddSiblingFeatures(DependencyInstanceNumeric* sentence,
     direction_code_second = 0x1;
   }
 
+  int left_position_hm, right_position_hm;
+  int left_position_ms, right_position_ms;
+  int left_position_hs, right_position_hs;
+
+  if (modifier < head) {
+    left_position_hm = modifier;
+    right_position_hm = head;
+  } else {
+    left_position_hm = head;
+    right_position_hm = modifier;
+  }
+
+  if (sibling < modifier) {
+    left_position_ms = sibling;
+    right_position_ms = modifier;
+  } else {
+    left_position_ms = modifier;
+    right_position_ms = sibling;
+  }
+
+  if (sibling < head) {
+    left_position_hs = sibling;
+    right_position_hs = head;
+  } else {
+    left_position_hs = head;
+    right_position_hs = sibling;
+  }
+
   // Codewords for accommodating word/POS information.
   uint16_t HWID, MWID, SWID;
   uint8_t HPID, MPID, SPID;
@@ -207,6 +235,22 @@ void DependencyFeatures::AddSiblingFeatures(DependencyInstanceNumeric* sentence,
   HB6ID = (*brown6_ids)[head];
   MB6ID = first_child? TOKEN_START : (*brown6_ids)[modifier];
   SB6ID = last_child? TOKEN_STOP : (*brown6_ids)[sibling];
+
+  // In between
+
+  uint8_t flag_between_verb_hm = sentence->GetPrecomputeBetweenVerbs(left_position_hm, right_position_hm);
+  uint8_t flag_between_punc_hm = sentence->GetPrecomputeBetweenPuncts(left_position_hm, right_position_hm);
+  uint8_t flag_between_coord_hm = sentence->GetPrecomputeBetweenCoords(left_position_hm, right_position_hm);
+
+  // VLOG(0) << left_position_ms << " " << right_position_ms;
+  uint8_t flag_between_verb_ms = sentence->GetPrecomputeBetweenVerbs(left_position_ms, right_position_ms);
+  uint8_t flag_between_punc_ms = sentence->GetPrecomputeBetweenPuncts(left_position_ms, right_position_ms);
+  uint8_t flag_between_coord_ms = sentence->GetPrecomputeBetweenCoords(left_position_ms, right_position_ms);
+
+  uint8_t flag_between_verb_hs = sentence->GetPrecomputeBetweenVerbs(left_position_hs, right_position_hs);
+  uint8_t flag_between_punc_hs = sentence->GetPrecomputeBetweenPuncts(left_position_hs, right_position_hs);
+  uint8_t flag_between_coord_hs = sentence->GetPrecomputeBetweenCoords(left_position_hs, right_position_hs);
+
 
   if (consecutive) {
     flags = DependencyFeatureTemplateParts::NEXTSIBL;
@@ -323,6 +367,120 @@ void DependencyFeatures::AddSiblingFeatures(DependencyInstanceNumeric* sentence,
   AddFeature(fkey, features);
   fkey = encoder_.CreateFKey_WW(DependencyFeatureTemplateSibling::MW_SW, flags, MWID, SWID);
   AddFeature(fkey, features);
+
+  // In between flags.
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::HMBFLAG, flags, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::MSBFLAG, flags, flag_between_verb_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::HSBFLAG, flags, flag_between_verb_hs);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::HMBFLAG, flags, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::MSBFLAG, flags, flag_between_punc_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::HSBFLAG, flags, flag_between_punc_hs);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::HMBFLAG, flags, flag_between_coord_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::MSBFLAG, flags, flag_between_coord_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateSibling::HSBFLAG, flags, flag_between_coord_hs);
+  AddFeature(fkey, features);
+
+  
+
+  /* Features 2 parts joint */
+  /* Joint HP MP */
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_HMBFLAG, flags, HPID, MPID, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_HMBFLAG, flags, HPID, MPID, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_HMBFLAG, flags, HPID, MPID, flag_between_coord_hm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_MSBFLAG, flags, HPID, MPID, flag_between_verb_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_MSBFLAG, flags, HPID, MPID, flag_between_punc_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_MSBFLAG, flags, HPID, MPID, flag_between_coord_ms);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_HSBFLAG, flags, HPID, MPID, flag_between_verb_hs);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_HSBFLAG, flags, HPID, MPID, flag_between_punc_hs);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_MP_HSBFLAG, flags, HPID, MPID, flag_between_coord_hs);
+  AddFeature(fkey, features);
+
+    /* Joint HP SP */
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_HMBFLAG, flags, HPID, SPID, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_HMBFLAG, flags, HPID, SPID, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_HMBFLAG, flags, HPID, SPID, flag_between_coord_hm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_MSBFLAG, flags, HPID, SPID, flag_between_verb_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_MSBFLAG, flags, HPID, SPID, flag_between_punc_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_MSBFLAG, flags, HPID, SPID, flag_between_coord_ms);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_HSBFLAG, flags, HPID, SPID, flag_between_verb_hs);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_HSBFLAG, flags, HPID, SPID, flag_between_punc_hs);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::HP_SP_HSBFLAG, flags, HPID, SPID, flag_between_coord_hs);
+  AddFeature(fkey, features);
+
+    /* Joint MP SP */
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_HMBFLAG, flags, MPID, SPID, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_HMBFLAG, flags, MPID, SPID, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_HMBFLAG, flags, MPID, SPID, flag_between_coord_hm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_MSBFLAG, flags, MPID, SPID, flag_between_verb_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_MSBFLAG, flags, MPID, SPID, flag_between_punc_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_MSBFLAG, flags, MPID, SPID, flag_between_coord_ms);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_HSBFLAG, flags, MPID, SPID, flag_between_verb_hs);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_HSBFLAG, flags, MPID, SPID, flag_between_punc_hs);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateSibling::MP_SP_HSBFLAG, flags, MPID, SPID, flag_between_coord_hs);
+  AddFeature(fkey, features);
+
+  /* Feature 3 parts joint */
+
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_HMBFLAG, flags, HPID, MPID, SPID, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_HMBFLAG, flags, HPID, MPID, SPID, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_HMBFLAG, flags, HPID, MPID, SPID, flag_between_coord_hm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_HSBFLAG, flags, HPID, MPID, SPID, flag_between_verb_hs);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_HSBFLAG, flags, HPID, MPID, SPID, flag_between_punc_hs);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_HSBFLAG, flags, HPID, MPID, SPID, flag_between_coord_hs);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_MSBFLAG, flags, HPID, MPID, SPID, flag_between_verb_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_MSBFLAG, flags, HPID, MPID, SPID, flag_between_punc_ms);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateSibling::HP_MP_SP_MSBFLAG, flags, HPID, MPID, SPID, flag_between_coord_ms);
+  AddFeature(fkey, features);
 }
 
 // Add features for grandparents.
@@ -352,22 +510,38 @@ void DependencyFeatures::AddGrandparentFeatures(
   uint8_t direction_code_gm; // 0x1 if right attachment, 0x0 otherwise.
   uint8_t direction_code; // 0x0, 0x1, or 0x2 (see three cases below).
 
+  int left_position_gh, right_position_gh;
+  int left_position_hm, right_position_hm;
+  int left_position_gm, right_position_gm;
+
   if (head < grandparent) {
     direction_code_gh = 0x0;
+    left_position_gh = head;
+    right_position_gh = grandparent;
   } else {
     direction_code_gh = 0x1;
+    left_position_gh = grandparent;
+    right_position_gh = head;
   }
 
   if (modifier < head) {
     direction_code_hm = 0x0;
+    left_position_hm = modifier;
+    right_position_hm = head;
   } else {
     direction_code_hm = 0x1;
+    left_position_hm = head;
+    right_position_hm = modifier;
   }
 
   if (modifier < grandparent) {
     direction_code_gm = 0x0;
+    left_position_gm = modifier;
+    right_position_gm = grandparent;
   } else {
     direction_code_gm = 0x1;
+    left_position_gm = grandparent;
+    right_position_gm = modifier;
   }
 
   if (direction_code_gh == direction_code_hm) {
@@ -430,6 +604,18 @@ void DependencyFeatures::AddGrandparentFeatures(
 
   // Add direction information.
   flags |= (direction_code << 6); // 2 more bits.
+
+  uint8_t flag_between_verb_gh = sentence->GetPrecomputeBetweenVerbs(left_position_gh, right_position_gh);
+  uint8_t flag_between_punc_gh = sentence->GetPrecomputeBetweenPuncts(left_position_gh, right_position_gh);
+  uint8_t flag_between_coord_gh = sentence->GetPrecomputeBetweenCoords(left_position_gh, right_position_gh);
+
+  uint8_t flag_between_verb_hm = sentence->GetPrecomputeBetweenVerbs(left_position_hm, right_position_hm);
+  uint8_t flag_between_punc_hm = sentence->GetPrecomputeBetweenPuncts(left_position_hm, right_position_hm);
+  uint8_t flag_between_coord_hm = sentence->GetPrecomputeBetweenCoords(left_position_hm, right_position_hm);
+
+  uint8_t flag_between_verb_gm = sentence->GetPrecomputeBetweenVerbs(left_position_gm, right_position_gm);
+  uint8_t flag_between_punc_gm = sentence->GetPrecomputeBetweenPuncts(left_position_gm, right_position_gm);
+  uint8_t flag_between_coord_gm = sentence->GetPrecomputeBetweenCoords(left_position_gm, right_position_gm);
 
   // Bias feature.
   fkey = encoder_.CreateFKey_NONE(DependencyFeatureTemplateGrandparent::BIAS, flags);
@@ -530,6 +716,120 @@ void DependencyFeatures::AddGrandparentFeatures(
   fkey = encoder_.CreateFKey_WW(DependencyFeatureTemplateGrandparent::GW_MW, flags, GWID, MWID);
   AddFeature(fkey, features);
   fkey = encoder_.CreateFKey_WW(DependencyFeatureTemplateGrandparent::HW_MW, flags, HWID, MWID);
+  AddFeature(fkey, features);
+
+  // In between flags.
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::GHBFLAG, flags, flag_between_verb_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::GMBFLAG, flags, flag_between_verb_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::HMBFLAG, flags, flag_between_verb_hm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::GHBFLAG, flags, flag_between_punc_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::GMBFLAG, flags, flag_between_punc_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::HMBFLAG, flags, flag_between_punc_hm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::GHBFLAG, flags, flag_between_coord_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::GMBFLAG, flags, flag_between_coord_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_P(DependencyFeatureTemplateGrandparent::HMBFLAG, flags, flag_between_coord_hm);
+  AddFeature(fkey, features);
+
+
+  /* Features 2 parts joint */
+  /* For HP MP */
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_GHBFLAG, flags, HPID, MPID, flag_between_verb_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_GHBFLAG, flags, HPID, MPID, flag_between_punc_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_GHBFLAG, flags, HPID, MPID, flag_between_coord_gh);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_GMBFLAG, flags, HPID, MPID, flag_between_verb_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_GMBFLAG, flags, HPID, MPID, flag_between_punc_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_GMBFLAG, flags, HPID, MPID, flag_between_coord_gm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_HMBFLAG, flags, HPID, MPID, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_HMBFLAG, flags, HPID, MPID, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::HP_MP_HMBFLAG, flags, HPID, MPID, flag_between_coord_hm);
+  AddFeature(fkey, features);
+
+  /* For GP HP */
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_GHBFLAG, flags, GPID, HPID, flag_between_verb_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_GHBFLAG, flags, GPID, HPID, flag_between_punc_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_GHBFLAG, flags, GPID, HPID, flag_between_coord_gh);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_GMBFLAG, flags, GPID, HPID, flag_between_verb_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_GMBFLAG, flags, GPID, HPID, flag_between_punc_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_GMBFLAG, flags, GPID, HPID, flag_between_coord_gm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_HMBFLAG, flags, GPID, HPID, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_HMBFLAG, flags, GPID, HPID, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_HP_HMBFLAG, flags, GPID, HPID, flag_between_coord_hm);
+  AddFeature(fkey, features);
+
+    /* For GP MP */
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_GHBFLAG, flags, GPID, MPID, flag_between_verb_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_GHBFLAG, flags, GPID, MPID, flag_between_punc_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_GHBFLAG, flags, GPID, MPID, flag_between_coord_gh);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_GMBFLAG, flags, GPID, MPID, flag_between_verb_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_GMBFLAG, flags, GPID, MPID, flag_between_punc_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_GMBFLAG, flags, GPID, MPID, flag_between_coord_gm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_HMBFLAG, flags, GPID, MPID, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_HMBFLAG, flags, GPID, MPID, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateGrandparent::GP_MP_HMBFLAG, flags, GPID, MPID, flag_between_coord_hm);
+  AddFeature(fkey, features);
+
+
+  /* Features 3 parts joint */
+
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_GHBFLAG, flags, GPID, HPID, MPID, flag_between_verb_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_GHBFLAG, flags, GPID, HPID, MPID, flag_between_punc_gh);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_GHBFLAG, flags, GPID, HPID, MPID, flag_between_coord_gh);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_GMBFLAG, flags, GPID, HPID, MPID, flag_between_verb_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_GMBFLAG, flags, GPID, HPID, MPID, flag_between_punc_gm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_GMBFLAG, flags, GPID, HPID, MPID, flag_between_coord_gm);
+  AddFeature(fkey, features);
+
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_HMBFLAG, flags, GPID, HPID, MPID, flag_between_verb_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_HMBFLAG, flags, GPID, HPID, MPID, flag_between_punc_hm);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_PPPP(DependencyFeatureTemplateGrandparent::GP_HP_MP_HMBFLAG, flags, GPID, HPID, MPID, flag_between_coord_hm);
   AddFeature(fkey, features);
 }
 
@@ -1928,6 +2228,16 @@ void DependencyFeatures::AddWordPairFeatures(DependencyInstanceNumeric* sentence
   AddFeature(fkey, features);
   fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateArc::HP_MP_BFLAG, flags, HPID, MPID, flag_between_coord);
   AddFeature(fkey, features);
+
+  // LPK: Joint the word with in-between flag.
+  fkey = encoder_.CreateFKey_WWP(DependencyFeatureTemplateArc::HW_MW_BFLAG, flags, HWID, MWID, flag_between_verb);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_WWP(DependencyFeatureTemplateArc::HW_MW_BFLAG, flags, HWID, MWID, flag_between_punc);
+  AddFeature(fkey, features);
+  fkey = encoder_.CreateFKey_WWP(DependencyFeatureTemplateArc::HW_MW_BFLAG, flags, HWID, MWID, flag_between_coord);
+  AddFeature(fkey, features);
+
+
   fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateArc::HB4_MB4_BFLAG, flags, HB4ID, MB4ID, flag_between_verb);
    AddFeature(fkey, features);
    fkey = encoder_.CreateFKey_PPP(DependencyFeatureTemplateArc::HB4_MB4_BFLAG, flags, HB4ID, MB4ID, flag_between_punc);
