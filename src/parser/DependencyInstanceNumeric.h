@@ -133,6 +133,23 @@ public:
   int GetPrecomputeBetweenPuncts(int i, int j) { return precompute_between_puncts_[i+1][j+1]; };
   int GetPrecomputeBetweenCoords(int i, int j) { return precompute_between_coords_[i+1][j+1]; };
 
+  int GetPunctType(string punct_form){
+    if(punct_form.length() < 1){
+      // This should never happen.
+      return -1;
+    }
+    if(punct_form.at(0) == ','){
+      return 0;
+    }
+    if(punct_form.at(0) == '.' || punct_form.at(0) == '!' || punct_form.at(0) == '?' || punct_form.at(0) == ';'){
+      return 1;
+    }
+    if(punct_form.at(0) == '\'' || punct_form.at(0) == '"' || punct_form.at(0) == '(' || punct_form.at(0) == ')' || punct_form.at(0) == '`' || punct_form.at(0) == '[' || punct_form.at(0) == ']' || punct_form.at(0) == '{' || punct_form.at(0) == '}'){
+      return 2;
+    }
+    return 3;
+  }
+
  private:
   vector<int> form_ids_;
   vector<int> brownall_ids_;
