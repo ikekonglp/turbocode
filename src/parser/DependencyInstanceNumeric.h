@@ -133,7 +133,6 @@ public:
   int GetPrecomputeBetweenPuncts(int i, int j) { return precompute_between_puncts_[i+1][j+1]; };
   int GetPrecomputeBetweenCoords(int i, int j) { return precompute_between_coords_[i+1][j+1]; };
 
-
  private:
   vector<int> form_ids_;
   vector<int> brownall_ids_;

@@ -401,6 +401,14 @@ struct DependencyFeatureTemplateSibling {
     HSBFLAG,                  /* X-between flag between the head and the sib */
     MSBFLAG,                  /* X-between flag between the mod and the sib */
 
+    /* Joint with head word and POS with the in between features */
+    HP_HMBFLAG,
+    HP_HSBFLAG,
+    HP_MSBFLAG,
+    HW_HMBFLAG,
+    HW_HSBFLAG,
+    HW_MSBFLAG,
+
     /* Joint with the POS and Word form */
     HP_MP_HMBFLAG,
     HP_SP_HMBFLAG,
@@ -530,6 +538,10 @@ struct DependencyFeatureTemplateGrandparent {
     GHBFLAG,                 
     GMBFLAG,                  
     HMBFLAG, 
+
+    /* Joint with grandparent features */
+    GP_GMBFLAG,
+    GW_GMBFLAG,
 
     /* Joint with the POS and Word form */
     GP_HP_GHBFLAG,

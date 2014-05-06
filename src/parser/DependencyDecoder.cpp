@@ -134,7 +134,7 @@ void DependencyDecoder::DecodeMarginals(Instance *instance, Parts *parts,
           scores[offset_labeled_arcs + r];
     }
     if (*entropy < 0.0) {
-      LOG(INFO) << "Entropy truncated to zero (" << *entropy << ")";
+      //LOG(INFO) << "Entropy truncated to zero (" << *entropy << ")";
       *entropy = 0.0;
     }
   }
@@ -144,7 +144,7 @@ void DependencyDecoder::DecodeMarginals(Instance *instance, Parts *parts,
     *loss += scores[r] * ((*predicted_output)[r] - gold_output[r]);
   }
   if (*loss < 0.0) {
-    LOG(INFO) << "Loss truncated to zero (" << *loss << ")";
+    //LOG(INFO) << "Loss truncated to zero (" << *loss << ")";
     *loss = 0.0;
   }
 }
@@ -399,7 +399,7 @@ void DependencyDecoder::DecodeBasic(Instance *instance, Parts *parts,
     int h = heads[m];
     int r = dependency_parts->FindArc(h, m);
     if (r < 0) {
-      LOG(INFO) << "No arc " << h << " -> " << m;
+      //LOG(INFO) << "No arc " << h << " -> " << m;
     } else {
       (*predicted_output)[offset_arcs + r] = 1.0;
     }
@@ -779,7 +779,7 @@ void DependencyDecoder::DecodeMatrixTree(Instance *instance, Parts *parts,
   }
   if (*entropy < 0.0) {
     if (!NEARLY_ZERO_TOL(*entropy, 1e-6)) {
-      LOG(INFO) << "Entropy truncated to zero (" << *entropy << ")";
+      //LOG(INFO) << "Entropy truncated to zero (" << *entropy << ")";
     }
     *entropy = 0.0;
   }
